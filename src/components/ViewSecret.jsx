@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 import { getSecret } from '../services/api';
 import { Lock, Unlock, AlertTriangle, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSnackbar } from '../context/SnackbarContext';
 
 const ViewSecret = () => {
     const { key } = useParams();
@@ -17,6 +18,7 @@ const ViewSecret = () => {
     const [progress, setProgress] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const [fileData, setFileData] = useState({ url: null, type: null, name: null });
+    const { showToast } = useSnackbar();
     
     // We get the decryption key from the URL hash component
     const aesKey = location.hash.replace('#', '');
@@ -71,12 +73,17 @@ const ViewSecret = () => {
         } catch (err) {
             clearInterval(progressInterval);
             setDecrypting(false);
-            setError(err.response?.data?.error || 'DATA PURGED: Secret not found or burned.');
+            const errMsg = err.response?.data?.error || 'DATA PURGED: Secret not found or burned.';
+            setError(errMsg);
+            if (errMsg.includes('burned') || errMsg.includes('DATA PURGED') || errMsg.includes('not found')) {
+                showToast('PROTOCOL_EXECUTED: View limit reached. Data has been purged.', 'error');
+            }
         }
     };
 
     const handleLock = () => {
         setIsVisible(false);
+        showToast('PROTOCOL_EXECUTED: View limit reached. Data has been purged.', 'error');
         // We use AnimatePresence on exit to trigger scale-down and fade
         setTimeout(() => {
             setLocked(true);
@@ -100,8 +107,8 @@ const ViewSecret = () => {
                     >
                         {!viewed && !error && !decrypting && (
                             <div style={{ textAlign: 'center' }}>
-                                <AlertTriangle size={56} color="var(--primary-color)" style={{ marginBottom: '1.5rem' }} />
-                                <h2 style={{ color: 'var(--primary-color)', fontFamily: 'var(--font-mono)' }}>INCOMING_ENCRYPTED_TRANSMISSION</h2>
+                                <AlertTriangle size={56} color="#FFFFFF" style={{ marginBottom: '1.5rem', margin: '0 auto' }} />
+                                <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-sans)', fontWeight: 300, letterSpacing: '1px' }}>INCOMING_ENCRYPTED_TRANSMISSION</h2>
                                 <p style={{ marginBottom: '2.5rem', color: 'var(--text-muted)' }}>
                                     Viewing this payload will trigger internal logging. 
                                     Once limits are exceeded, protocol dictates autonomous database scrub.
@@ -127,9 +134,9 @@ const ViewSecret = () => {
                         )}
 
                         {error && (
-                            <div className="alert-message alert-error glitch-anim">
+                            <div className="alert-message alert-error">
                                 <AlertTriangle size={24} />
-                                <div style={{ fontFamily: 'var(--font-mono)' }}>{error}</div>
+                                <div style={{ fontFamily: 'var(--font-sans)' }}>{error}</div>
                             </div>
                         )}
 
@@ -138,12 +145,12 @@ const ViewSecret = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
-                                <h3 style={{ color: 'var(--primary-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-mono)' }}>
+                                <h3 style={{ color: '#FFFFFF', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-sans)', fontWeight: 300 }}>
                                     <Unlock /> PAYLOAD_DECRYPTED
                                 </h3>
                                 
                                 {secretMessage && (
-                                    <div className="secret-content">
+                                    <div className="secret-content" style={{ fontFamily: 'var(--font-mono)', background: '#1A1A1A', borderLeft: '4px solid #2563EB', padding: '2rem', marginTop: '2rem' }}>
                                         {secretMessage}
                                     </div>
                                 )}
