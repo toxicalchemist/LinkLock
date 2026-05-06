@@ -42,9 +42,6 @@ function App() {
                 </h1>
               </div>
             </div>
-            <div className="font-mono text-slate-400 text-sm md:text-base tracking-widest opacity-80 text-center">
-              V 1.0 (SECURE_INSTANCE)
-            </div>
           </div>
           <Routes>
             <Route path="/" element={<CreateSecret />} />

@@ -92,7 +92,7 @@ const ViewSecret = () => {
 
     return (
         <motion.div 
-            className="vault-ui"
+            className="vault-ui w-full max-w-3xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -150,16 +150,22 @@ const ViewSecret = () => {
                                 </h3>
                                 
                                 {secretMessage && (
-                                    <div className="secret-content" style={{ fontFamily: 'var(--font-mono)', background: '#1A1A1A', borderLeft: '4px solid #2563EB', padding: '2rem', marginTop: '2rem' }}>
+                                    <div className="secret-content w-full overflow-x-auto text-left" style={{ fontFamily: 'var(--font-mono)', background: 'rgba(0,0,0,0.4)', borderLeft: '4px solid #B45309', padding: '2rem', marginTop: '2rem' }}>
                                         {secretMessage}
                                     </div>
                                 )}
                                 
                                 {fileData.url && (
-                                    <div style={{ marginTop: '1.5rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px' }}>
-                                        <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '1rem', fontFamily: 'var(--font-mono)' }}>ATTACHED_SECURE_FILE</h4>
+                                    <div style={{ marginTop: '1.5rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.4)', border: '1px solid #2D2D2D' }}>
+                                        <h4 style={{ color: '#B45309', marginTop: 0, marginBottom: '1rem', fontFamily: 'var(--font-mono)', textAlign: 'left' }}>ATTACHED_SECURE_FILE</h4>
                                         {fileData.type && fileData.type.startsWith('image/') ? (
-                                            <img src={`http://localhost:5000${fileData.url}`} alt={fileData.name} style={{ maxWidth: '100%', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }} />
+                                            <div className="w-full flex justify-center bg-black/50 p-2 border border-[#2D2D2D]">
+                                                <img 
+                                                    src={`http://localhost:5000${fileData.url}`} 
+                                                    alt={fileData.name} 
+                                                    className="w-full h-auto max-h-[60vh] object-contain" 
+                                                />
+                                            </div>
                                         ) : (
                                             <a href={`http://localhost:5000${fileData.url}`} download={fileData.name} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', textAlign: 'center', width: 'auto', padding: '0.8rem 1.5rem' }}>
                                                 DOWNLOAD {fileData.name || 'FILE'}
