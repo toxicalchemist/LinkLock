@@ -35,7 +35,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#0A0A0A] relative overflow-hidden p-6">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#121212] relative overflow-hidden p-6">
       {/* High-Tech Background Animation */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         <div 
@@ -46,7 +46,7 @@ const Login = () => {
             animation: 'grid-move 20s linear infinite'
           }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-[#0A0A0A]"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-[#121212]"></div>
       </div>
 
       <style>
