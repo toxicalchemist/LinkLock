@@ -4,6 +4,7 @@ import { createSecret } from '../services/api';
 import { Shield, Eye, UploadCloud, X, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSnackbar } from '../context/SnackbarContext';
+import { AuthContext } from '../context/AuthContext';
 
 const CreateSecret = () => {
     const [message, setMessage] = useState('');
@@ -16,6 +17,7 @@ const CreateSecret = () => {
     const [file, setFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const { showToast } = useSnackbar();
+    const { user } = React.useContext(AuthContext);
 
     const handleFileDrop = (e) => {
         e.preventDefault();
@@ -55,6 +57,7 @@ const CreateSecret = () => {
             formData.append('viewLimit', parseInt(viewLimit));
             formData.append('expiryValue', parseInt(expiryValue));
             formData.append('expiryUnit', expiryUnit);
+
             
             if (file) {
                 formData.append('file', file);

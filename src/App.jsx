@@ -1,12 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import CreateSecret from './components/CreateSecret';
 import ViewSecret from './components/ViewSecret';
-import Dashboard from './pages/Admin/Dashboard';
+import Overview from './pages/Admin/Overview';
+import SecurityAudit from './pages/Admin/SecurityAudit';
+import SystemSettings from './pages/Admin/SystemSettings';
 import SplashScreen from './components/SplashScreen';
+import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import MyVaults from './pages/MyVaults';
+import AdminUsers from './pages/Admin/Users';
 import { SnackbarProvider } from './context/SnackbarContext';
-import logo from './assets/logo.png'; // Make sure to save your logo here!
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import { useContext } from 'react';
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
+  
+  if (!user || user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+};
+
+const AppLayout = () => {
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/view/');
+
+  return (
+    <div className="flex min-h-screen w-full bg-[#0A0A0A] text-slate-300 font-sans">
+      {!isAuthPage && <Sidebar />}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        {!isAuthPage && <TopBar />}
+        <main className={`flex-1 overflow-y-auto ${!isAuthPage ? 'p-8' : ''}`}>
+          <Routes>
+            <Route path="/" element={<ProtectedRoute><CreateSecret /></ProtectedRoute>} />
+            <Route path="/view/:key" element={<ViewSecret />} />
+            <Route path="/admin" element={<ProtectedRoute><AdminRoute><Overview /></AdminRoute></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminRoute><AdminUsers /></AdminRoute></ProtectedRoute>} />
+            <Route path="/admin/logs" element={<ProtectedRoute><AdminRoute><SecurityAudit /></AdminRoute></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute><AdminRoute><SystemSettings /></AdminRoute></ProtectedRoute>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/vaults" element={<ProtectedRoute><MyVaults /></ProtectedRoute>} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -19,38 +76,16 @@ function App() {
   }, []);
 
   return (
-    <SnackbarProvider>
-      <Router>
-        <AnimatePresence>
-          {loading && <SplashScreen key="splash" />}
-        </AnimatePresence>
-        <div className="app-container flex flex-col items-center justify-start min-h-screen w-full">
-          <div className="flex flex-col items-center justify-center pt-8 pb-12 gap-4 w-full">
-            <div className="relative flex items-center justify-center w-full">
-              <div className="relative flex items-center justify-center">
-                <div className="absolute right-full mr-4 flex items-center justify-center">
-                  <motion.img 
-                    src={logo} 
-                    alt="LinkLock Logo" 
-                    className="w-20 h-20 md:w-28 md:h-28 object-contain brightness-0 invert" 
-                    animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </div>
-                <h1 className="text-6xl md:text-8xl font-thin tracking-tighter drop-shadow-md text-slate-50 m-0 leading-tight text-center">
-                  LINKLOCK
-                </h1>
-              </div>
-            </div>
-          </div>
-          <Routes>
-            <Route path="/" element={<CreateSecret />} />
-            <Route path="/view/:key" element={<ViewSecret />} />
-            <Route path="/admin" element={<Dashboard />} />
-          </Routes>
-        </div>
-      </Router>
-    </SnackbarProvider>
+    <AuthProvider>
+      <SnackbarProvider>
+        <Router>
+          <AnimatePresence>
+            {loading && <SplashScreen key="splash" />}
+          </AnimatePresence>
+          <AppLayout />
+        </Router>
+      </SnackbarProvider>
+    </AuthProvider>
   );
 }
 

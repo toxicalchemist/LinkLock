@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getAdminOverview, clearLegacyLogs } from '../../services/api';
-import { Activity, Flame, Clock, Radio, Database } from 'lucide-react';
+import { getAdminOverview, clearLegacyLogs, getSettings, updateSettings } from '../../services/api';
+import { Activity, Flame, Clock, Radio, Database, Settings, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSnackbar } from '../../context/SnackbarContext';
 
@@ -16,6 +16,8 @@ const Dashboard = () => {
     const [isGlitching, setIsGlitching] = useState(false);
     const [filterEventType, setFilterEventType] = useState('ALL');
     const [searchLinkId, setSearchLinkId] = useState('');
+    const [activeTab, setActiveTab] = useState('overview');
+    const [settings, setSettings] = useState({ maintenanceMode: false, globalMaxExpiry: 604800 });
     const { showToast } = useSnackbar();
 
     const filteredLogs = (data.logs || []).map(log => ({
@@ -40,6 +42,8 @@ const Dashboard = () => {
     const fetchData = async () => {
         try {
             const overview = await getAdminOverview();
+            const fetchedSettings = await getSettings();
+            setSettings(fetchedSettings);
             
             if (overview && overview.logs) {
                 // Check if burned instances went up
@@ -59,6 +63,19 @@ const Dashboard = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSaveSettings = async () => {
+        try {
+            await updateSettings(settings);
+            showToast('SYSTEM_SETTINGS_UPDATED', 'success');
+        } catch (err) {
+            showToast('FAILED_TO_UPDATE_SETTINGS', 'error');
+        }
+    };
+
+    const handleDownloadAudit = () => {
+        window.open('http://localhost:5000/api/admin/logs/export', '_blank');
     };
 
     useEffect(() => {
@@ -93,9 +110,26 @@ const Dashboard = () => {
                 </div>
             </motion.div>
 
+            <div className="flex gap-4 mb-6 border-b border-slate-700/50 pb-2">
+                <button 
+                    onClick={() => setActiveTab('overview')} 
+                    className={`font-mono uppercase tracking-widest text-sm px-4 py-2 transition-colors ${activeTab === 'overview' ? 'text-copper border-b-2 border-copper' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                    System Overview
+                </button>
+                <button 
+                    onClick={() => setActiveTab('settings')} 
+                    className={`font-mono uppercase tracking-widest text-sm px-4 py-2 transition-colors ${activeTab === 'settings' ? 'text-copper border-b-2 border-copper' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                    Global Policy
+                </button>
+            </div>
+
             {error && <div className="alert-message alert-error">{error}</div>}
 
-            <motion.div 
+            {activeTab === 'overview' ? (
+                <>
+                    <motion.div 
                 className="status-cards-container"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -165,6 +199,13 @@ const Dashboard = () => {
                         <option value="BURN_MANUAL">BURN_MANUAL</option>
                     </select>
                     <button 
+                        onClick={handleDownloadAudit}
+                        className="btn-primary"
+                        style={{ width: 'auto', marginTop: 0, padding: '0.8rem 1.5rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <Download size={16} /> DOWNLOAD AUDIT
+                    </button>
+                    <button 
                         onClick={handleClearLegacy} 
                         className="btn-danger" 
                         style={{ width: 'auto', marginTop: 0, padding: '0.8rem 1.5rem', whiteSpace: 'nowrap' }}
@@ -213,6 +254,55 @@ const Dashboard = () => {
                     </tbody>
                 </table>
             </motion.div>
+                </>
+            ) : (
+                <motion.div 
+                    className="glass-panel p-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h3 className="flex items-center gap-2 text-slate-100 font-sans tracking-widest mb-6">
+                        <Settings className="text-copper" />
+                        GLOBAL_SECURITY_POLICY
+                    </h3>
+                    
+                    <div className="flex flex-col gap-6">
+                        <div className="flex items-center justify-between p-4 border border-slate-700/50 bg-slate-900/40 rounded-xl">
+                            <div>
+                                <h4 className="text-slate-200 font-mono text-lg m-0">MAINTENANCE_MODE</h4>
+                                <p className="text-slate-500 font-mono text-sm mt-1">Disables the creation of new secure links. Existing links remain accessible.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" className="sr-only peer" checked={settings.maintenanceMode} onChange={(e) => setSettings({...settings, maintenanceMode: e.target.checked})} />
+                                <div className="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-copper"></div>
+                            </label>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border border-slate-700/50 bg-slate-900/40 rounded-xl">
+                            <div className="flex-1">
+                                <h4 className="text-slate-200 font-mono text-lg m-0">GLOBAL_MAX_EXPIRY (Seconds)</h4>
+                                <p className="text-slate-500 font-mono text-sm mt-1">The maximum lifespan allowed for any newly created payload across the entire system. Maximum default is 7 days (604800).</p>
+                            </div>
+                            <div className="flex items-center gap-4 ml-8">
+                                <input 
+                                    type="number" 
+                                    className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-slate-200 font-mono focus:border-copper focus:ring-1 focus:ring-copper outline-none transition-all w-48"
+                                    value={settings.globalMaxExpiry}
+                                    onChange={(e) => setSettings({...settings, globalMaxExpiry: parseInt(e.target.value) || 0})}
+                                />
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleSaveSettings}
+                            className="btn-primary mt-4 py-3 font-mono tracking-widest uppercase bg-copper hover:bg-copper/90 transition-all self-start"
+                        >
+                            ENFORCE_NEW_POLICY
+                        </button>
+                    </div>
+                </motion.div>
+            )}
         </motion.div>
     );
 };
