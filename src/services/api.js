@@ -58,3 +58,8 @@ export const deactivateUser = async (userId) => {
     const response = await api.put(`/admin/users/${userId}/deactivate`);
     return response.data;
 };
+
+export const getInbox = async () => {
+    const response = await api.get('/links/inbox');
+    return response.data;
+};

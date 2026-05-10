@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MyVaults from './pages/MyVaults';
 import AdminUsers from './pages/Admin/Users';
+import Inbox from './pages/Inbox';
 import { SnackbarProvider } from './context/SnackbarContext';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { useContext } from 'react';
@@ -58,6 +59,7 @@ const AppLayout = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/vaults" element={<ProtectedRoute><MyVaults /></ProtectedRoute>} />
+            <Route path="/inbox" element={<ProtectedRoute><Inbox /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>

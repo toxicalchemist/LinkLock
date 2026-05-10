@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Shield, LayoutDashboard, Archive, Activity, Settings, PlusSquare } from 'lucide-react';
+import { Shield, LayoutDashboard, Archive, Activity, Settings, PlusSquare, Mail } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import logo from '../assets/logo.png';
 
@@ -9,6 +9,7 @@ const Sidebar = () => {
 
   const navItems = [
     { name: 'Secure Vault', path: '/', icon: PlusSquare },
+    { name: 'Secure Inbox', path: '/inbox', icon: Mail },
     { name: 'Active Instances', path: '/vaults', icon: Archive },
   ];
 

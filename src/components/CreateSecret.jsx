@@ -48,8 +48,8 @@ const CreateSecret = () => {
         setGeneratedLink('');
 
         try {
-            const aesKey = generateRandomStr(16);
             const documentKey = generateRandomStr(16);
+            const aesKey = isPrivate ? documentKey : generateRandomStr(16);
             const encryptedContent = CryptoJS.AES.encrypt(message, aesKey).toString();
 
             const formData = new FormData();
@@ -73,12 +73,16 @@ const CreateSecret = () => {
                 showToast('UPLOADING_BINARY: File is being secured...', 'success');
             }
 
-            await createSecret(formData);
-            showToast('SYSTEM_INITIALIZED: Secure link generated successfully.', 'success');
-
-            const url = `${window.location.origin}/view/${documentKey}#${aesKey}`;
-            setGeneratedLink(url);
+            const response = await createSecret(formData);
             
+            if (isPrivate && authorizedEmails && response.isPrivate) {
+                showToast('SYSTEM_INITIALIZED: Recipients have been notified via email.', 'success');
+                setGeneratedLink('INVITATION_SENT'); // Sentinel value to show success message instead of link
+            } else {
+                showToast('SYSTEM_INITIALIZED: Secure link generated successfully.', 'success');
+                const url = `${window.location.origin}/view/${documentKey}#${aesKey}`;
+                setGeneratedLink(url);
+            }
         } catch (err) {
             setError(err.response?.data?.error || 'System fault: Connection refused.');
         } finally {
@@ -310,25 +314,46 @@ const CreateSecret = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                     >
-                        <p style={{ color: 'var(--primary-color)', marginBottom: '0.8rem', fontWeight: 600 }}>[ LINK GENERATED SUCCESSFULLY ]</p>
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                            <a href={generatedLink} target="_blank" rel="noopener noreferrer" className="break-all">{generatedLink}</a>
-                            <button 
-                                type="button"
-                                className="btn-primary py-2 px-4 flex items-center gap-2 whitespace-nowrap mt-0"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(generatedLink);
-                                    showToast('ENCRYPTED_ID: Copied to clipboard.', 'success');
-                                }}
-                            >
-                                <Copy size={16} /> COPY
-                            </button>
-                        </div>
-                        <p style={{ fontSize: '0.85rem', marginTop: '1.5rem', color: 'var(--secondary-color)', fontWeight: 600 }}>
-                            WARNING: Key is stored locally in URL hash. Server cannot recover lost keys.
-                        </p>
+                        {generatedLink === 'INVITATION_SENT' ? (
+                            <div className="flex flex-col items-center gap-4 py-6">
+                                <Shield size={48} color="#B45309" className="mb-2" />
+                                <p style={{ color: 'var(--primary-color)', fontSize: '1.25rem', fontWeight: 600, textAlign: 'center' }}>
+                                    Vault secured. Invitations have been sent to the recipients' Gmail.
+                                </p>
+                                <p style={{ color: 'var(--text-muted)', textAlign: 'center', maxWidth: '80%' }}>
+                                    The authorized recipients can now access this vault by logging in with their email.
+                                </p>
+                                <button 
+                                    className="btn-primary mt-4 py-2 px-8"
+                                    onClick={() => setGeneratedLink('')}
+                                >
+                                    CREATE_ANOTHER
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <p style={{ color: 'var(--primary-color)', marginBottom: '0.8rem', fontWeight: 600 }}>[ LINK GENERATED SUCCESSFULLY ]</p>
+                                <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+                                    <a href={generatedLink} target="_blank" rel="noopener noreferrer" className="break-all">{generatedLink}</a>
+                                    <button 
+                                        type="button"
+                                        className="btn-primary py-2 px-4 flex items-center gap-2 whitespace-nowrap mt-0"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(generatedLink);
+                                            showToast('ENCRYPTED_ID: Copied to clipboard.', 'success');
+                                        }}
+                                    >
+                                        <Copy size={16} /> COPY
+                                    </button>
+                                </div>
+                                <p style={{ fontSize: '0.85rem', marginTop: '1.5rem', color: 'var(--secondary-color)', fontWeight: 600 }}>
+                                    WARNING: Key is stored locally in URL hash. Server cannot recover lost keys.
+                                </p>
+                            </>
+                        )}
                     </motion.div>
                 )}
+
             </div>
         </motion.div>
     );

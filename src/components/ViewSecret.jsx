@@ -21,9 +21,8 @@ const ViewSecret = () => {
     const [fileData, setFileData] = useState({ url: null, type: null, name: null });
     const { showToast } = useSnackbar();
     
-    // We get the decryption key from the URL hash component
-    const aesKey = location.hash.replace('#', '');
-
+    // We get the decryption key from the URL hash component, or fallback to key for private vaults
+    const aesKey = location.hash.replace('#', '') || key;
 
     const handleReveal = async () => {
         if (!aesKey) {
