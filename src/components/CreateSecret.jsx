@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CryptoJS from 'crypto-js';
 import { createSecret } from '../services/api';
 import { Shield, Eye, UploadCloud, X, Copy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSnackbar } from '../context/SnackbarContext';
 import { AuthContext } from '../context/AuthContext';
 
@@ -11,6 +11,8 @@ const CreateSecret = () => {
     const [viewLimit, setViewLimit] = useState(1);
     const [expiryValue, setExpiryValue] = useState(24);
     const [expiryUnit, setExpiryUnit] = useState('Hours');
+    const [authorizedEmails, setAuthorizedEmails] = useState('');
+    const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(false);
     const [generatedLink, setGeneratedLink] = useState('');
     const [error, setError] = useState('');
@@ -57,6 +59,13 @@ const CreateSecret = () => {
             formData.append('viewLimit', parseInt(viewLimit));
             formData.append('expiryValue', parseInt(expiryValue));
             formData.append('expiryUnit', expiryUnit);
+            formData.append('isPrivate', isPrivate);
+            if (isPrivate && authorizedEmails) {
+                const emailArray = authorizedEmails.split(',').map(e => e.trim()).filter(e => e !== '');
+                emailArray.forEach(email => {
+                    formData.append('authorizedEmails', email);
+                });
+            }
 
             
             if (file) {
@@ -225,6 +234,57 @@ const CreateSecret = () => {
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="form-group flex flex-col text-left mt-4 p-4 border border-[rgba(180,83,9,0.2)] bg-[rgba(180,83,9,0.02)]">
+                        <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                                <label className="text-xl font-medium text-slate-400 tracking-wider uppercase mb-1">SECURITY_LEVEL: {isPrivate ? 'PRIVATE' : 'PUBLIC'}</label>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    {isPrivate ? 'MANDATORY: Recipient must login to decrypt payload.' : 'ANONYMOUS: No login required for transmission.'}
+                                </p>
+                            </div>
+                            <div 
+                                className={`w-14 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors ${isPrivate ? 'bg-[#B45309]' : 'bg-[#2D2D2D]'}`}
+                                onClick={() => {
+                                    const nextVal = !isPrivate;
+                                    setIsPrivate(nextVal);
+                                    if (!nextVal) setAuthorizedEmails('');
+                                }}
+                            >
+                                <motion.div 
+                                    className="bg-white w-5 h-5 rounded-full shadow-md"
+                                    animate={{ x: isPrivate ? 28 : 0 }}
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            </div>
+                        </div>
+
+                        <AnimatePresence>
+                            {isPrivate && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mt-4 overflow-hidden"
+                                >
+                                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">AUTHORIZED_EMAILS (OPTIONAL_GROUP)</label>
+                                    <div className="flex items-center bg-[rgba(0,0,0,0.4)] rounded-none px-4 border border-[rgba(255,255,255,0.1)] focus-within:border-[#B45309] transition-colors">
+                                        <Shield size={18} color="var(--text-muted)" />
+                                        <input 
+                                            type="text" 
+                                            className="w-full bg-transparent outline-none text-lg font-mono text-white py-3 px-2" 
+                                            value={authorizedEmails}
+                                            onChange={(e) => setAuthorizedEmails(e.target.value)}
+                                            placeholder="user1@org.com, user2@org.com"
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '0.75rem', color: 'rgba(180, 83, 9, 0.7)', marginTop: '0.5rem' }}>
+                                        LEAVE BLANK: Any logged-in user can view. ADD EMAILS: Only specific users.
+                                    </p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     <motion.button 

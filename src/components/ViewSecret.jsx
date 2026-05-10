@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import { getSecret } from '../services/api';
 import { Lock, Unlock, AlertTriangle, Terminal } from 'lucide-react';
@@ -9,6 +9,7 @@ import { useSnackbar } from '../context/SnackbarContext';
 const ViewSecret = () => {
     const { key } = useParams();
     const location = useLocation();
+    const navigate = useNavigate();
     
     const [secretMessage, setSecretMessage] = useState('');
     const [error, setError] = useState('');
@@ -22,6 +23,7 @@ const ViewSecret = () => {
     
     // We get the decryption key from the URL hash component
     const aesKey = location.hash.replace('#', '');
+
 
     const handleReveal = async () => {
         if (!aesKey) {
@@ -77,6 +79,19 @@ const ViewSecret = () => {
             setError(errMsg);
             if (errMsg.includes('burned') || errMsg.includes('DATA PURGED') || errMsg.includes('not found')) {
                 showToast('PROTOCOL_EXECUTED: View limit reached. Data has been purged.', 'error');
+            }
+
+            if (err.response?.status === 403) {
+                showToast('UNAUTHORIZED: This secret was not intended for you.', 'error');
+                setError('UNAUTHORIZED: This secret was not intended for you.');
+                setTimeout(() => {
+                    navigate('/');
+                }, 3000);
+            } else if (err.response?.status === 401 || err.response?.data?.requireLogin) {
+                showToast('IDENTITY_REQUIRED: Unauthorized access. Redirecting...', 'info');
+                setTimeout(() => {
+                    navigate('/login', { state: { from: location } });
+                }, 1500);
             }
         }
     };
