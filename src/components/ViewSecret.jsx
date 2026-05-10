@@ -183,13 +183,13 @@ const ViewSecret = () => {
                                             {fileData.type && fileData.type.startsWith('image/') ? (
                                                 <div className="w-full flex justify-center bg-black/60 p-2 border border-zinc-800 rounded">
                                                     <img 
-                                                        src={`http://localhost:5000${fileData.url}`} 
+                                                        src={`http://localhost:5000/${fileData.url}`} 
                                                         alt={fileData.name} 
                                                         className="w-full h-auto max-h-[50vh] object-contain" 
                                                     />
                                                 </div>
                                             ) : (
-                                                <a href={`http://localhost:5000${fileData.url}`} download={fileData.name} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full py-3 px-6 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-sm tracking-widest transition-colors rounded">
+                                                <a href={`http://localhost:5000/${fileData.url}`} download={fileData.name} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full py-3 px-6 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-sm tracking-widest transition-colors rounded">
                                                     DOWNLOAD {fileData.name || 'FILE'}
                                                 </a>
                                             )}
