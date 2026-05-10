@@ -37,10 +37,10 @@ const Sidebar = () => {
             to={item.path}
             end={item.path === '/admin' || item.path === '/'}
             className={({ isActive }) => 
-              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-sans tracking-wide border ${
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-sans tracking-wide border font-semibold ${
                 isActive 
-                  ? 'bg-copper/10 border-copper/30 text-copper font-medium' 
-                  : 'border-transparent text-slate-400 hover:bg-[#1A1A1A] hover:text-slate-200'
+                  ? 'bg-copper/10 border-copper/30 text-orange-500' 
+                  : 'border-transparent text-zinc-400 hover:bg-[#1A1A1A] hover:text-zinc-200'
               }`
             }
           >

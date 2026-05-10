@@ -114,7 +114,7 @@ const CreateSecret = () => {
 
                         <div className="form-group flex flex-col text-left">
                             <div className="flex justify-between items-end mb-2">
-                                <label className="text-xl font-medium text-slate-400 tracking-wider uppercase m-0">PAYLOAD_DATA</label>
+                                <label className="text-xl font-medium text-zinc-100 tracking-wider uppercase m-0">PAYLOAD_DATA</label>
                                 <div className="flex items-center gap-3" title={`${Math.floor(progressPerc)}% Payload Capacity`}>
                                     <span className="font-mono text-sm text-[#B45309]">{message.length.toLocaleString()} / {maxChars.toLocaleString()}</span>
                                     <svg width="24" height="24" className="transform -rotate-90">
@@ -201,7 +201,7 @@ const CreateSecret = () => {
                     
                     <div className="flex flex-col md:flex-row gap-6 overflow-visible text-left mt-2">
                         <div className="form-group flex-1 min-w-[150px]">
-                            <label className="text-xl font-medium text-slate-400 tracking-wider uppercase mb-2">MAXIMUM_VIEWS</label>
+                            <label className="text-xl font-medium text-zinc-100 tracking-wider uppercase mb-2">MAXIMUM_VIEWS</label>
                             <div className="flex items-center bg-[rgba(0,0,0,0.4)] rounded-none px-4 border border-[rgba(255,255,255,0.1)] focus-within:border-[#B45309] transition-colors">
                                 <Eye size={18} color="var(--text-muted)" />
                                 <input 
@@ -217,7 +217,7 @@ const CreateSecret = () => {
                         </div>
                         
                         <div className="form-group flex-1 min-w-[150px] overflow-visible">
-                            <label className="text-xl font-medium text-slate-400 tracking-wider uppercase mb-2">SELF_DESTRUCT_TIMER</label>
+                            <label className="text-xl font-medium text-zinc-100 tracking-wider uppercase mb-2">SELF_DESTRUCT_TIMER</label>
                             <div className="flex gap-2">
                                 <input 
                                     type="number"
@@ -243,7 +243,7 @@ const CreateSecret = () => {
                     <div className="form-group flex flex-col text-left mt-4 p-4 border border-[rgba(180,83,9,0.2)] bg-[rgba(180,83,9,0.02)]">
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
-                                <label className="text-xl font-medium text-slate-400 tracking-wider uppercase mb-1">SECURITY_LEVEL: {isPrivate ? 'PRIVATE' : 'PUBLIC'}</label>
+                                <label className="text-xl font-medium text-zinc-100 tracking-wider uppercase mb-1">SECURITY_LEVEL: {isPrivate ? 'PRIVATE' : 'PUBLIC'}</label>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                                     {isPrivate ? 'MANDATORY: Recipient must login to decrypt payload.' : 'ANONYMOUS: No login required for transmission.'}
                                 </p>
@@ -272,20 +272,25 @@ const CreateSecret = () => {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="mt-4 overflow-hidden"
                                 >
-                                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">AUTHORIZED_EMAILS (OPTIONAL_GROUP)</label>
-                                    <div className="flex items-center bg-[rgba(0,0,0,0.4)] rounded-none px-4 border border-[rgba(255,255,255,0.1)] focus-within:border-[#B45309] transition-colors">
-                                        <Shield size={18} color="var(--text-muted)" />
+                                    <label className={`text-[10px] font-mono uppercase tracking-widest mb-1 ${isPrivate && !authorizedEmails.trim() ? 'text-red-500' : 'text-zinc-300'}`}>AUTHORIZED_EMAILS (REQUIRED)</label>
+                                    <div className={`flex items-center bg-[rgba(0,0,0,0.4)] rounded-none px-4 border transition-colors ${isPrivate && !authorizedEmails.trim() ? 'border-red-500' : 'border-[rgba(255,255,255,0.1)] focus-within:border-[#B45309]'}`}>
+                                        <Shield size={18} color={isPrivate && !authorizedEmails.trim() ? '#EF4444' : 'var(--text-muted)'} />
                                         <input 
                                             type="text" 
                                             className="w-full bg-transparent outline-none text-lg font-mono text-white py-3 px-2" 
                                             value={authorizedEmails}
                                             onChange={(e) => setAuthorizedEmails(e.target.value)}
                                             placeholder="user1@org.com, user2@org.com"
+                                            required={isPrivate}
                                         />
                                     </div>
-                                    <p style={{ fontSize: '0.75rem', color: 'rgba(180, 83, 9, 0.7)', marginTop: '0.5rem' }}>
-                                        LEAVE BLANK: Any logged-in user can view. ADD EMAILS: Only specific users.
-                                    </p>
+                                    {isPrivate && !authorizedEmails.trim() ? (
+                                        <p className="text-red-500 text-xs mt-1">Authorized Emails are required for a Private Vault.</p>
+                                    ) : (
+                                        <p style={{ fontSize: '0.75rem', color: 'rgba(180, 83, 9, 0.7)', marginTop: '0.5rem' }}>
+                                            ADD EMAILS: Only these specific users can view the payload.
+                                        </p>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -293,15 +298,15 @@ const CreateSecret = () => {
 
                     <motion.button 
                         type="submit" 
-                        className="btn-primary w-full mt-8 py-4 text-xl font-medium tracking-widest bg-[#B45309] text-white" 
-                        disabled={loading}
-                        whileHover={!loading ? { 
+                        className={`btn-primary w-full mt-8 py-4 text-xl font-medium tracking-widest ${loading || (isPrivate && !authorizedEmails.trim()) ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-[#B45309] text-white'}`} 
+                        disabled={loading || (isPrivate && !authorizedEmails.trim())}
+                        whileHover={!loading && !(isPrivate && !authorizedEmails.trim()) ? { 
                             scale: 1.02,
                             background: "linear-gradient(90deg, #B45309, #D97706, #B45309)",
                             backgroundSize: "200% 100%",
                             transition: { duration: 0.3 }
                         } : {}}
-                        whileTap={!loading ? { scale: 0.98 } : {}}
+                        whileTap={!loading && !(isPrivate && !authorizedEmails.trim()) ? { scale: 0.98 } : {}}
                     >
                         {loading ? 'ENCRYPTING...' : 'INITIALIZE_SECURE_LINK'}
                     </motion.button>

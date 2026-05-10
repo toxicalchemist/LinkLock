@@ -105,112 +105,131 @@ const ViewSecret = () => {
     };
 
     return (
-        <motion.div 
-            className="vault-ui w-full max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        >
+        <div className="min-h-screen flex items-center justify-center w-full p-4 bg-[#0a0a0a]">
             <AnimatePresence mode="wait">
                 {isVisible && !locked ? (
                     <motion.div 
-                        className="glass-panel"
                         key="active-panel"
-                        exit={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
-                        transition={{ duration: 0.5 }}
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+                        transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
+                        className="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 shadow-[0_0_50px_-12px_rgba(249,115,22,0.3)] rounded-lg overflow-hidden relative"
                     >
-                        {!viewed && !error && !decrypting && (
-                            <div style={{ textAlign: 'center' }}>
-                                <AlertTriangle size={56} color="#FFFFFF" style={{ marginBottom: '1.5rem', margin: '0 auto' }} />
-                                <h2 style={{ color: '#FFFFFF', fontFamily: 'var(--font-sans)', fontWeight: 300, letterSpacing: '1px' }}>INCOMING_ENCRYPTED_TRANSMISSION</h2>
-                                <p style={{ marginBottom: '2.5rem', color: 'var(--text-muted)' }}>
-                                    Viewing this payload will trigger internal logging. 
-                                    Once limits are exceeded, protocol dictates autonomous database scrub.
-                                </p>
-                                <button className="btn-primary" onClick={handleReveal}>
-                                    <Unlock size={18} style={{ marginRight: '10px', verticalAlign: 'middle' }} />
-                                    INITIATE_DECRYPTION
-                                </button>
-                            </div>
-                        )}
-
-                        {decrypting && (
-                            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                                <Terminal size={48} color="var(--primary-color)" className="pulse-icon" style={{ marginBottom: '1rem' }} />
-                                <h3 style={{ color: 'var(--primary-color)', fontFamily: 'var(--font-mono)' }}>BRUTE_FORCING_HASH...</h3>
-                                <div className="progress-bar-container">
-                                    <div className="progress-bar" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                        {/* Security IDs */}
+                        <div className="absolute top-3 left-4 text-[10px] text-zinc-600 font-mono tracking-widest">SYS.ID // {key.substring(0,8)}</div>
+                        <div className="absolute top-3 right-4 text-[10px] text-zinc-600 font-mono tracking-widest">STATUS // ACTIVE</div>
+                        
+                        <div className="p-8 md:p-12 mt-4">
+                            {!viewed && !error && !decrypting && (
+                                <div className="text-center flex flex-col items-center">
+                                    <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mb-6 border border-zinc-700/50 shadow-inner">
+                                        <AlertTriangle size={32} className="text-copper" />
+                                    </div>
+                                    <h2 className="text-xl md:text-2xl text-white font-sans font-light tracking-widest mb-4">INCOMING_ENCRYPTED_TRANSMISSION</h2>
+                                    <p className="text-zinc-400 text-sm mb-8 max-w-md mx-auto leading-relaxed">
+                                        Viewing this payload will trigger internal logging. 
+                                        Once limits are exceeded, protocol dictates autonomous database scrub.
+                                    </p>
+                                    <button 
+                                        onClick={handleReveal}
+                                        className="bg-copper/10 hover:bg-copper border border-copper/50 hover:border-copper text-copper hover:text-black font-mono tracking-wider py-3 px-8 rounded transition-all duration-300 flex items-center gap-3 uppercase text-sm"
+                                    >
+                                        <Unlock size={16} /> INITIATE_DECRYPTION
+                                    </button>
                                 </div>
-                                <p style={{ marginTop: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                                    {Math.floor(progress)}% DECRYPTED
-                                </p>
-                            </div>
-                        )}
+                            )}
 
-                        {error && (
-                            <div className="alert-message alert-error">
-                                <AlertTriangle size={24} />
-                                <div style={{ fontFamily: 'var(--font-sans)' }}>{error}</div>
-                            </div>
-                        )}
+                            {decrypting && (
+                                <div className="text-center py-8">
+                                    <Terminal size={48} className="text-copper mx-auto mb-6 animate-pulse" />
+                                    <h3 className="text-copper font-mono tracking-widest mb-4 text-lg">BRUTE_FORCING_HASH...</h3>
+                                    <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
+                                        <div className="h-full bg-copper transition-all duration-100 ease-linear" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                                    </div>
+                                    <p className="text-zinc-500 font-mono text-sm tracking-widest">
+                                        {Math.floor(progress)}% DECRYPTED
+                                    </p>
+                                </div>
+                            )}
 
-                        {viewed && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                            >
-                                <h3 style={{ color: '#FFFFFF', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-sans)', fontWeight: 300 }}>
-                                    <Unlock /> PAYLOAD_DECRYPTED
-                                </h3>
-                                
-                                {secretMessage && (
-                                    <div className="secret-content w-full overflow-x-auto text-left" style={{ fontFamily: 'var(--font-mono)', background: 'rgba(0,0,0,0.4)', borderLeft: '4px solid #B45309', padding: '2rem', marginTop: '2rem' }}>
-                                        {secretMessage}
+                            {error && (
+                                <div className="bg-red-900/20 border border-red-900/50 text-red-400 p-4 rounded flex items-start gap-4">
+                                    <AlertTriangle size={24} className="shrink-0 mt-0.5" />
+                                    <div className="font-sans text-sm leading-relaxed">{error}</div>
+                                </div>
+                            )}
+
+                            {viewed && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="flex flex-col"
+                                >
+                                    <div className="flex items-center gap-3 text-white mb-6 font-sans font-light tracking-wide border-b border-zinc-800 pb-4">
+                                        <Unlock className="text-copper" size={20} /> PAYLOAD_DECRYPTED
                                     </div>
-                                )}
-                                
-                                {fileData.url && (
-                                    <div style={{ marginTop: '1.5rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.4)', border: '1px solid #2D2D2D' }}>
-                                        <h4 style={{ color: '#B45309', marginTop: 0, marginBottom: '1rem', fontFamily: 'var(--font-mono)', textAlign: 'left' }}>ATTACHED_SECURE_FILE</h4>
-                                        {fileData.type && fileData.type.startsWith('image/') ? (
-                                            <div className="w-full flex justify-center bg-black/50 p-2 border border-[#2D2D2D]">
-                                                <img 
-                                                    src={`http://localhost:5000${fileData.url}`} 
-                                                    alt={fileData.name} 
-                                                    className="w-full h-auto max-h-[60vh] object-contain" 
-                                                />
-                                            </div>
-                                        ) : (
-                                            <a href={`http://localhost:5000${fileData.url}`} download={fileData.name} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-block', textAlign: 'center', width: 'auto', padding: '0.8rem 1.5rem' }}>
-                                                DOWNLOAD {fileData.name || 'FILE'}
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
-                                
-                                <button className="btn-danger" onClick={handleLock}>
-                                    ACKNOWLEDGE_&_PURGE
-                                </button>
-                            </motion.div>
-                        )}
+                                    
+                                    {secretMessage && (
+                                        <div className="w-full overflow-x-auto text-left font-mono text-sm text-zinc-300 bg-black/40 border-l-2 border-copper p-6 mb-6 rounded-r">
+                                            <pre className="whitespace-pre-wrap font-inherit">{secretMessage}</pre>
+                                        </div>
+                                    )}
+                                    
+                                    {fileData.url && (
+                                        <div className="mb-8 p-6 bg-black/40 border border-zinc-800 rounded">
+                                            <h4 className="text-copper font-mono text-xs tracking-widest mb-4 uppercase">ATTACHED_SECURE_FILE</h4>
+                                            {fileData.type && fileData.type.startsWith('image/') ? (
+                                                <div className="w-full flex justify-center bg-black/60 p-2 border border-zinc-800 rounded">
+                                                    <img 
+                                                        src={`http://localhost:5000${fileData.url}`} 
+                                                        alt={fileData.name} 
+                                                        className="w-full h-auto max-h-[50vh] object-contain" 
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <a href={`http://localhost:5000${fileData.url}`} download={fileData.name} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center w-full py-3 px-6 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-sm tracking-widest transition-colors rounded">
+                                                    DOWNLOAD {fileData.name || 'FILE'}
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    <button 
+                                        onClick={handleLock}
+                                        className="w-full bg-red-900/20 hover:bg-red-900/40 border border-red-900/50 text-red-500 font-mono tracking-widest py-3 rounded transition-all duration-300 mt-2 text-sm uppercase hover:text-red-400"
+                                    >
+                                        ACKNOWLEDGE_&_PURGE
+                                    </button>
+                                </motion.div>
+                            )}
+                        </div>
                     </motion.div>
                 ) : null}
                 
                 {locked && (
                     <motion.div 
-                        className="glass-panel locked-screen"
                         key="locked-panel"
-                        initial={{ opacity: 0, scale: 1.2 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: "spring", bounce: 0.5 }}
+                        initial={{ opacity: 0, scale: 1.1, filter: 'brightness(2) contrast(1.5)', x: -10 }}
+                        animate={{ opacity: 1, scale: 1, filter: 'brightness(1) contrast(1)', x: 0 }}
+                        transition={{ duration: 0.5, type: "spring", bounce: 0.4 }}
+                        className="w-full max-w-lg bg-zinc-950 border border-red-900/50 shadow-[0_0_40px_-10px_rgba(220,38,38,0.2)] rounded-lg overflow-hidden p-10 text-center relative"
                     >
-                        <Lock className="locked-icon" />
-                        <h2 style={{ color: 'var(--secondary-color)', fontSize: '2rem', letterSpacing: '4px', fontFamily: 'var(--font-mono)' }}>SYSTEM_LOCKED</h2>
-                        <p style={{ color: 'var(--text-muted)' }}>This memory sector has been permanently overwritten.</p>
+                        {/* Glitch lines overlay */}
+                        <div className="absolute inset-0 bg-[repeating-linear-gradient(transparent,transparent_2px,rgba(0,0,0,0.5)_3px)] pointer-events-none opacity-30"></div>
+                        
+                        <div className="relative z-10 flex flex-col items-center">
+                            <Lock className="text-red-600 mb-6" size={64} strokeWidth={1.5} />
+                            <h2 className="text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] text-2xl md:text-3xl font-mono tracking-[0.2em] font-bold mb-4">DATA_EXPUNGED</h2>
+                            <p className="text-zinc-500 text-sm font-sans max-w-sm">
+                                This secret has been permanently deleted from the LinkLock servers.
+                            </p>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     );
 };
 

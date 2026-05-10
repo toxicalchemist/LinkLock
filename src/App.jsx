@@ -44,7 +44,7 @@ const AppLayout = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/view/');
 
   return (
-    <div className="flex min-h-screen w-full bg-[#121212] text-slate-300 font-sans">
+    <div className="flex min-h-screen w-full bg-[#121212] text-zinc-300 font-sans">
       {!isAuthPage && <Sidebar />}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {!isAuthPage && <TopBar />}

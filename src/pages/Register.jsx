@@ -101,30 +101,33 @@ const Register = () => {
           </div>
 
           <div className="relative group/input">
-            <label className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1 group-focus-within/input:text-copper transition-colors">Security Password</label>
+            <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1 transition-colors ${password && password.length < 8 ? 'text-red-500' : 'text-slate-500 group-focus-within/input:text-copper'}`}>Security Password</label>
             <input
               type="password"
-              className="w-full bg-[#2D2D2D] border-b-2 border-[#2A2A2A] focus:border-copper rounded-none p-3 text-slate-200 font-mono outline-none transition-all focus:shadow-[0_4px_12px_-4px_rgba(180,83,9,0.3)]"
+              className={`w-full bg-[#2D2D2D] border-b-2 rounded-none p-3 text-slate-200 font-mono outline-none transition-all ${password && password.length < 8 ? 'border-red-500 focus:shadow-[0_4px_12px_-4px_rgba(239,68,68,0.3)]' : 'border-[#2A2A2A] focus:border-copper focus:shadow-[0_4px_12px_-4px_rgba(180,83,9,0.3)]'}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {password && password.length < 8 && <p className="text-red-500 text-xs mt-1">Password must be at least 8 characters</p>}
           </div>
 
           <div className="relative group/input">
-            <label className="block text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1 group-focus-within/input:text-copper transition-colors">Confirm Password</label>
+            <label className={`block text-[10px] font-mono uppercase tracking-widest mb-1 transition-colors ${confirmPassword && confirmPassword !== password ? 'text-red-500' : 'text-slate-500 group-focus-within/input:text-copper'}`}>Confirm Password</label>
             <input
               type="password"
-              className="w-full bg-[#2D2D2D] border-b-2 border-[#2A2A2A] focus:border-copper rounded-none p-3 text-slate-200 font-mono outline-none transition-all focus:shadow-[0_4px_12px_-4px_rgba(180,83,9,0.3)]"
+              className={`w-full bg-[#2D2D2D] border-b-2 rounded-none p-3 text-slate-200 font-mono outline-none transition-all ${confirmPassword && confirmPassword !== password ? 'border-red-500 focus:shadow-[0_4px_12px_-4px_rgba(239,68,68,0.3)]' : 'border-[#2A2A2A] focus:border-copper focus:shadow-[0_4px_12px_-4px_rgba(180,83,9,0.3)]'}`}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+            {confirmPassword && confirmPassword !== password && <p className="text-red-500 text-xs mt-1">Passwords do not match</p>}
           </div>
 
           <button 
             type="submit" 
-            className="mt-4 w-full bg-copper hover:bg-copper/90 text-white font-bold py-4 px-4 rounded-none transition-all shadow-[0_4px_15px_rgba(184,115,51,0.2)] hover:shadow-[0_4px_25px_rgba(184,115,51,0.4)] uppercase tracking-[0.2em] text-sm"
+            disabled={password.length < 8 || password !== confirmPassword}
+            className={`mt-4 w-full font-bold py-4 px-4 rounded-none transition-all uppercase tracking-[0.2em] text-sm ${password.length < 8 || password !== confirmPassword ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-copper hover:bg-copper/90 text-white shadow-[0_4px_15px_rgba(184,115,51,0.2)] hover:shadow-[0_4px_25px_rgba(184,115,51,0.4)]'}`}
           >
             Register
           </button>
